@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main, develop]
+    branches: [main, develop, codecov]
 
 jobs:
   # pylint:
@@ -45,3 +45,7 @@ jobs:
         run: docker exec cheshire_cat_core python -m pytest --color=yes .
       - name: Cat down
         run: docker-compose down
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
