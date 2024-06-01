@@ -42,7 +42,7 @@ jobs:
       - name: Cat up
         run: docker-compose up -d
       - name: Test
-        run: docker exec cheshire_cat_core python -m pytest --color=yes .
+        run: docker exec cheshire_cat_core python -m pytest --color=yes --cov --cov-report=html:core/coverage_re .
       - name: Cat down
         run: docker-compose down
       - name: Upload coverage reports to Codecov
