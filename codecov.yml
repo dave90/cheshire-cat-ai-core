@@ -13,3 +13,37 @@ comment:
   require_base: yes       # [yes :: must have a base report to post]
   require_head: yes       # [yes :: must have a head report to post]
   branches: null          # branch names that can post comment
+
+
+component_management:
+  default_rules:  # default rules that will be inherited by all components
+    statuses:
+      - type: project # in this case every component that doens't have a status defined will have a project type one
+        target: auto
+        branches:
+          - "!main"
+  individual_components:
+    - component_id: module_db
+      name: db
+      paths:
+        - core/cat/db/**
+    - component_id: module_factory
+      name: factory
+      paths:
+        - core/cat/factory/**
+    - component_id: module_looking_glass
+      name: looking_glass
+      paths:
+        - core/cat/looking_glass/**
+    - component_id: module_mad_hatter
+      name: mad_hatter
+      paths:
+        - core/cat/mad_hatter/**
+    - component_id: module_memory
+      name: memory
+      paths:
+        - core/cat/memory/**
+    - component_id: module_routes
+      name: routes
+      paths:
+        - core/cat/routes/**
