@@ -15,6 +15,8 @@ async def home() -> Dict:
     with open("pyproject.toml", "rb") as f:
         project_toml = tomli.load(f)["project"]
 
+    x = 10
+
     return {
         "status": "We're all mad here, dear!",
         "version": project_toml['version']
