@@ -15,11 +15,24 @@ async def home() -> Dict:
     with open("pyproject.toml", "rb") as f:
         project_toml = tomli.load(f)["project"]
 
+    x = 10
+
     return {
         "status": "We're all mad here, dear!",
         "version": project_toml['version']
     }
 
+# server status
+@router.get("/test")
+async def home2() -> Dict:
+    """Server status""" 
+    with open("pyproject.toml", "rb") as f:
+        project_toml = tomli.load(f)["project"]
+
+    return {
+        "status": "We're all mad here, dear!",
+        "version": project_toml['version']
+    }
 
 @router.post("/message", response_model=CatMessage)
 async def message_with_cat(
