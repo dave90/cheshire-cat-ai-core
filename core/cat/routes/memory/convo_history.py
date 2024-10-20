@@ -51,7 +51,7 @@ async def post_conversation_history(
     historyMessage: HistoryMessage,
     stray: StrayCat = Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
 ) -> Dict:
-    """Insert a conversation history into working memory"""
+    """Create a conversation history in working memory"""
 
     stray.working_memory.update_conversation_history(historyMessage.who,historyMessage.message,why=historyMessage.why)
     return {"history": stray.working_memory.history}
