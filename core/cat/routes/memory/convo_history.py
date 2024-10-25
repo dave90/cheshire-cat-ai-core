@@ -1,20 +1,20 @@
 
+import time
 from pydantic import BaseModel
 from typing import Dict, Optional
-from fastapi import Request, APIRouter, Depends, Form
+from fastapi import Request, APIRouter, Depends, Form, HTTPException
 
 from cat.auth.connection import HTTPAuth
 from cat.auth.permissions import AuthPermission, AuthResource
 from cat.looking_glass.stray_cat import StrayCat
-
-from cat.convo.messages import MessageWhy
+from cat.convo.messages import Role
 
 router = APIRouter()
 
 class HistoryMessage(BaseModel):
     who:str
     message:str
-    why: Dict = {}
+    why: Dict
     
 
 
@@ -44,15 +44,31 @@ async def get_conversation_history(
     return {"history": stray.working_memory.history}
 
 
-# POST conversation history from working memory
-@router.post("/conversation_history")
-async def post_conversation_history(
+# PUT conversation history from working memory
+@router.put("/conversation_history/{conversation_history_index}")
+async def put_conversation_history(
     request: Request,
+    conversation_history_index: int,
     historyMessage: HistoryMessage,
     stray: StrayCat = Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
 ) -> Dict:
-    """Create a conversation history in working memory"""
+    """Edit a conversation history in working memory in a specified index"""
 
-    stray.working_memory.update_conversation_history(historyMessage.who,historyMessage.message,why=historyMessage.why)
-    return {"history": stray.working_memory.history}
+    history = stray.working_memory.history 
+    if conversation_history_index < 0 or conversation_history_index >= len(history):
+        raise HTTPException(
+            status_code=400, detail={"error": f"Invalid conversation history index. Please use a valid index >= 0 AND < {len(stray.working_memory)}."}
+        )
+
+    prev_history_message = history[conversation_history_index]   
+
+    history[conversation_history_index] = {
+        "who": historyMessage.who,
+        "message": historyMessage.message,
+        "why": historyMessage.why,
+        "when": prev_history_message["when"],
+        "role": prev_history_message["role"]
+    }
+
+    return history[conversation_history_index]
 
