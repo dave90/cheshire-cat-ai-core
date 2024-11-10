@@ -52,12 +52,37 @@ async def put_conversation_history(
     historyMessage: HistoryMessage,
     stray: StrayCat = Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
 ) -> Dict:
-    """Edit a conversation history in working memory in a specified index"""
+    """Edit a conversation history in working memory in a specified index. Supports negative indexing for reverse access.
+    
+    Example
+    ----------
+    ```
+    # overwrite last history message
+    req_json = {
+        "who": "Human",
+        "message": f"MIAO!",
+        "why": {},
+    }
+    res = requests.post(
+        f"http://localhost:1865/memory/conversation_history/-1", json=req_json
+    )
+
+    # overwrite first history message
+    res = requests.post(
+        f"http://localhost:1865/memory/conversation_history/0", json=req_json
+    )
+    ```
+
+    """
 
     history = stray.working_memory.history 
+    # if is negative calculate the index
+    if conversation_history_index < 0:
+        conversation_history_index = len(history) + conversation_history_index
+
     if conversation_history_index < 0 or conversation_history_index >= len(history):
         raise HTTPException(
-            status_code=400, detail={"error": f"Invalid conversation history index. Please use a valid index >= 0 AND < {len(stray.working_memory)}."}
+            status_code=400, detail={"error": f"Invalid conversation history index. Index out of range. Please use a valid -{len(history)} < index < {len(history)}."}
         )
 
     prev_history_message = history[conversation_history_index]   
@@ -66,9 +91,8 @@ async def put_conversation_history(
         "who": historyMessage.who,
         "message": historyMessage.message,
         "why": historyMessage.why,
-        "when": prev_history_message["when"],
-        "role": prev_history_message["role"]
+        "when": prev_history_message["when"] if historyMessage.when is None else historyMessage.when,
+        "role": prev_history_message["role"] if historyMessage.role is None else historyMessage.role
     }
 
     return history[conversation_history_index]
-
